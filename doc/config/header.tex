@@ -1,0 +1,26 @@
+% Estilo de encabezado personalizado usando fancyhdr
+\pagestyle{fancy}
+\fancyhead{} % Limpiar encabezado previo
+
+\fancyhead[C]{%
+    \begin{tabular}{|p{5cm}|p{8.5cm}|p{2.6cm}|}
+    \hline 
+    % Logo izquierda
+    \multirow{5}{*}{\parbox[t]{5cm}{\vspace{-1.2cm}\centering\includegraphics[width=4.5cm, height=1.6cm]{img/epis.png}}}
+    % Información central
+    & \centering{\scriptsize \textbf{\\ \uniLaboratorio \\ \facultadLaboratorio\\ \escuelaLaboratorio}} 
+    % Logo derecha
+    & \multirow{5}{*}{\parbox[t]{2.4cm}{\vspace{-1.2cm}\centering\includegraphics[width=2cm, height=1.2cm]{img/abet.png}}} \\
+    \hline
+    \multicolumn{3}{|c|}{\footnotesize \textbf{Formato:} Guía de Práctica de Laboratorio / Talleres / Centros de Simulación} \\
+    \hline
+    {\footnotesize \textbf{Aprobación}: 2022/03/01} 
+    & \centering{\footnotesize \textbf{Código}: GUIA-PRLD-001} 
+    & {\footnotesize \textbf{Página:} \thepage} \\
+    \hline
+    \end{tabular}
+    \vspace{-2.5cm} % Ajuste vertical del encabezado
+}
+
+% Eliminar línea de separación del encabezado
+\renewcommand{\headrulewidth}{0pt}

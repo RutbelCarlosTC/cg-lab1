@@ -1,0 +1,22 @@
+{
+    "version": "0.2",
+    "language": "en,es",
+
+    "ignorePaths": [
+        "**/.gitignore",
+        "**/.git/**",
+        "**/*.aux",
+        "**/*.bbl",
+        "**/*.bcf",
+        "**/*.blg",
+        "**/*.log",
+        "**/*.out",
+        "**/*.pdf",
+        "**/*.run.xml",
+        "**/*.synctex.gz",
+        "build/_minted/**",
+        "img/**",
+        "refs.bib"
+    ],
+    "words": ["Colab"]
+}

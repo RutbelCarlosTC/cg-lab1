@@ -1,0 +1,20 @@
+# Archivos y directorios generados por LaTeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.fdb_latexmk
+*.fls
+*.gz
+
+# Archivos generados por minted
+_minted*/
+
+# Ignorar carpeta de compilación pero mantener main.pdf
+/latex/build/*
+!/latex/build/main.pdf

@@ -1,0 +1,35 @@
+\documentclass[12pt,english,spanish]{article}
+
+% Configuración modular
+\input{config/packages}
+\input{config/styles}
+\input{config/commands}
+\input{config/header}
+\input{config/bibliography}
+
+\begin{document}
+
+\begin{center}
+    \textbf{\large INFORME DE LABORATORIO}
+\end{center}
+
+% Información general
+\input{sections/0-general}
+
+% Contenido del informe
+%INTRODUCCIÓN
+\input{sections/1-intro}
+
+%OBJETIVOS
+\input{sections/2-objetivos}
+
+%SOLUCIÓN DE EJERCICIOS/PROBLEMAS
+\input{sections/3-ejercicios}
+
+%CONCLUSIONES
+\input{sections/4-conclusiones}
+
+% Bibliografía
+\input{sections/5-referencias} % o directamente \printbibliography
+
+\end{document}
