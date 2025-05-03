@@ -1,5 +1,7 @@
 {
     "editor.fontFamily": "Arial",
+    //"editor.fontFamily": "Jetbrains Mono",
+    "terminal.integrated.fontFamily": "Jetbrains Mono",
     "editor.minimap.enabled": false,
     "editor.fontSize": 12,
     "breadcrumbs.enabled": false,
