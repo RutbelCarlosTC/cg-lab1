@@ -960,10 +960,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 62299151837959314, guid: 1ee091a662ec14e588fdacbb9ba3e280, type: 3}
-      propertyPath: m_RootOrder
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 62299151837959314, guid: 1ee091a662ec14e588fdacbb9ba3e280, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1
       objectReference: {fileID: 0}
@@ -1011,10 +1007,6 @@ PrefabInstance:
       propertyPath: m_Material
       value: 
       objectReference: {fileID: 13400000, guid: 605a26f5be7754be9b7cf62e34c99899, type: 2}
-    - target: {fileID: 7505664946870845732, guid: 1ee091a662ec14e588fdacbb9ba3e280, type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

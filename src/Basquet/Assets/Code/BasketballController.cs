@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,9 @@ using UnityEngine;
 public class BasketballController : MonoBehaviour {
 
     public float MoveSpeed = 10;
+    public float launchDistance = 10f;
+    
+
     public Transform Ball;
     public Transform PosDribble;
     public Transform PosOverHead;
@@ -16,12 +20,13 @@ public class BasketballController : MonoBehaviour {
     private bool IsBallFlying = false;
     private float T = 0;
 
+
     // Update is called once per frame
     void Update() {
 
         // walking
-        Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
-        transform.position += direction * MoveSpeed * Time.deltaTime;
+        Vector3 direction = new(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        transform.position += MoveSpeed * Time.deltaTime * direction;
         transform.LookAt(transform.position + direction);
 
         // ball in hands
@@ -33,7 +38,7 @@ public class BasketballController : MonoBehaviour {
                 Arms.localEulerAngles = Vector3.right * 180;
 
                 // look towards the target
-                transform.LookAt(Target.parent.position);
+                //transform.LookAt(Target.parent.position);
             }
 
             // dribbling
@@ -57,19 +62,33 @@ public class BasketballController : MonoBehaviour {
             float t01 = T / duration;
 
             // move to target
+            
+            Vector3 launchDirection = transform.forward; // o basado en mouse/stick input
             Vector3 A = PosOverHead.position;
-            Vector3 B = Target.position;
+            Vector3 B = A + launchDirection * launchDistance;
+            //Vector3 B = Target.position;
             Vector3 pos = Vector3.Lerp(A, B, t01);
 
             // move in arc
-            Vector3 arc = Vector3.up * 5 * Mathf.Sin(t01 * 3.14f);
+            Vector3 arc = 5 * Mathf.Sin(t01 * 3.14f) * Vector3.up;
 
             Ball.position = pos + arc;
 
             // moment when ball arrives at the target
-            if (t01 >= 1) {
+            if (t01 >= 1f) {
                 IsBallFlying = false;
-                Ball.GetComponent<Rigidbody>().isKinematic = false;
+                Rigidbody rb = Ball.GetComponent<Rigidbody>();
+                rb.isKinematic = false;
+
+                // Estimar velocidad final como derivada de la posición
+                Vector3 finalVelocity = (B - A) / duration;
+                //Vector3 arcVelocity = 5f * Mathf.PI * Mathf.Cos(Mathf.PI) * Vector3.up / duration; // derivada del arco
+                Vector3 arcVelocity = -5f * Mathf.PI / duration * Vector3.up; 
+
+                Vector3 totalVelocity = finalVelocity + arcVelocity;
+                Debug.Log("velocidad final: " + totalVelocity );
+                rb.velocity = totalVelocity; // velocidad total
+
             }
         }
     }
