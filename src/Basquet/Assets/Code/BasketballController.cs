@@ -1,104 +1,140 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class BasketballController : MonoBehaviour {
+public class BasketballController : MonoBehaviour
+{
+    [Header("Movimiento del Jugador")]
+    public float MoveSpeed = 10f;
 
-    public float MoveSpeed = 10;
-    public float launchDistance = 10f;
-    
+    [Header("Lanzamiento")]
+    public float baseLaunchDistance = 1f;
+    public float maxLaunchDistance = 10f;
+    public float chargeSpeed = 5f;
+    public float gravity = -9.8f;
+    [SerializeField] private float maxHeight = 10f;
 
+    private float currentLaunchDistance;
+    private float launchDistance;
+
+    [Header("Referencias")]
     public Transform Ball;
     public Transform PosDribble;
     public Transform PosOverHead;
     public Transform Arms;
     public Transform Target;
 
-    // variables
+    [Header("Trayectoria")]
+    public LineRenderer TrajectoryLine;
+    public int trajectoryResolution = 30;
+
     private bool IsBallInHands = true;
-    private bool IsBallFlying = false;
-    private float T = 0;
 
+    void Start()
+    {
+        TrajectoryLine.enabled = false;
+        currentLaunchDistance = baseLaunchDistance;
+        Ball.GetComponent<Rigidbody>().isKinematic = false;
 
-    // Update is called once per frame
-    void Update() {
+        Physics.gravity = new Vector3(0, gravity, 0); // Aplicar gravedad personalizada
+    }
 
-        // walking
+    void Update()
+    {
+        // Movimiento del jugador
         Vector3 direction = new(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         transform.position += MoveSpeed * Time.deltaTime * direction;
-        transform.LookAt(transform.position + direction);
+        if (direction != Vector3.zero)
+            transform.LookAt(transform.position + direction);
 
-        // ball in hands
-        if (IsBallInHands) {
+        if (IsBallInHands)
+        {
+            if (Input.GetKey(KeyCode.Space))
+            {
+                // Cargar lanzamiento
+                currentLaunchDistance += chargeSpeed * Time.deltaTime;
+                currentLaunchDistance = Mathf.Clamp(currentLaunchDistance, baseLaunchDistance, maxLaunchDistance);
 
-            // hold over head
-            if (Input.GetKey(KeyCode.Space)) {
                 Ball.position = PosOverHead.position;
                 Arms.localEulerAngles = Vector3.right * 180;
 
-                // look towards the target
-                //transform.LookAt(Target.parent.position);
-            }
+                // Dibujar trayectoria
+                Vector3 launchDirection = transform.forward;
+                DrawTrajectory(PosOverHead.position, launchDirection, currentLaunchDistance, maxHeight);
+                TrajectoryLine.enabled = true;
 
-            // dribbling
-            else {
-                Ball.position = PosDribble.position + Vector3.up * Mathf.Abs(Mathf.Sin(Time.time * 10));
+                //Debug.Log("Posicion manos arriba: " + Ball.position);
+            }
+            else
+            {
+                // Animación de dribbling
+                Ball.position = PosDribble.position + Vector3.up * Mathf.Abs(Mathf.Sin(Time.time * 7));
                 Arms.localEulerAngles = Vector3.right * 0;
             }
 
-            // throw ball
-            if (Input.GetKeyUp(KeyCode.Space)) {
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                // Lanzar balón
+                launchDistance = currentLaunchDistance;
+                currentLaunchDistance = baseLaunchDistance;
+
+                Lanzar();
                 IsBallInHands = false;
-                IsBallFlying = true;
-                T = 0;
-            }
-        }
-
-        // ball in the air
-        if (IsBallFlying) {
-            T += Time.deltaTime;
-            float duration = 0.66f;
-            float t01 = T / duration;
-
-            // move to target
-            
-            Vector3 launchDirection = transform.forward; // o basado en mouse/stick input
-            Vector3 A = PosOverHead.position;
-            Vector3 B = A + launchDirection * launchDistance;
-            //Vector3 B = Target.position;
-            Vector3 pos = Vector3.Lerp(A, B, t01);
-
-            // move in arc
-            Vector3 arc = 5 * Mathf.Sin(t01 * 3.14f) * Vector3.up;
-
-            Ball.position = pos + arc;
-
-            // moment when ball arrives at the target
-            if (t01 >= 1f) {
-                IsBallFlying = false;
-                Rigidbody rb = Ball.GetComponent<Rigidbody>();
-                rb.isKinematic = false;
-
-                // Estimar velocidad final como derivada de la posición
-                Vector3 finalVelocity = (B - A) / duration;
-                //Vector3 arcVelocity = 5f * Mathf.PI * Mathf.Cos(Mathf.PI) * Vector3.up / duration; // derivada del arco
-                Vector3 arcVelocity = -5f * Mathf.PI / duration * Vector3.up; 
-
-                Vector3 totalVelocity = finalVelocity + arcVelocity;
-                Debug.Log("velocidad final: " + totalVelocity );
-                rb.velocity = totalVelocity; // velocidad total
-
+                TrajectoryLine.enabled = false;
             }
         }
     }
 
-    private void OnTriggerEnter(Collider other) {
+    void Lanzar()
+    {
+        Vector3 launchDirection = transform.forward;
+        Vector3 A = PosOverHead.position;
+        Ball.position = A;
+        Vector3 B = A + launchDirection * launchDistance;
 
-        if (!IsBallInHands && !IsBallFlying) {
+        Rigidbody ballRB = Ball.GetComponent<Rigidbody>();
+        ballRB.useGravity = true;
 
+        ballRB.velocity = CalcularVelocidadInicial(A, B);
+
+        //Debug.Log("Posicion antes de lanzar: " + ballRB.position);
+        Debug.Log("Velocidad inicial: " + ballRB.velocity);
+    }
+
+    Vector3 CalcularVelocidadInicial(Vector3 origen, Vector3 destino)
+    {
+        Vector3 desplazamiento = destino - origen;
+        float g = Mathf.Abs(gravity);
+
+        float velocidadY = Mathf.Sqrt(2 * g * maxHeight);
+        float t1 = velocidadY / g;
+        float h = desplazamiento.y + maxHeight;
+        if (h < 0) h = 0;
+
+        float t2 = Mathf.Sqrt(2 * h / g);
+        float tTotal = t1 + t2;
+        float velocidadX = desplazamiento.x / tTotal;
+        float velocidadZ = desplazamiento.z / tTotal;
+
+        return new Vector3(velocidadX, velocidadY, velocidadZ);
+    }
+
+    void DrawTrajectory(Vector3 start, Vector3 direction, float distance, float height)
+    {
+        TrajectoryLine.positionCount = trajectoryResolution;
+
+        for (int i = 0; i < trajectoryResolution; i++)
+        {
+            float t = i / (float)(trajectoryResolution - 1);
+            Vector3 linearPos = Vector3.Lerp(start, start + direction * distance, t);
+            Vector3 arc = height * Mathf.Sin(t * Mathf.PI) * Vector3.up;
+            TrajectoryLine.SetPosition(i, linearPos + arc);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsBallInHands)
+        {
             IsBallInHands = true;
-            Ball.GetComponent<Rigidbody>().isKinematic = true;
         }
     }
 }
