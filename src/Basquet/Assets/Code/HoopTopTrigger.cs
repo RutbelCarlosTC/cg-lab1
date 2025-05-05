@@ -16,7 +16,7 @@ public class HoopTopTrigger : MonoBehaviour
         if (other.CompareTag("Ball"))
         {
             // Cuando la bola sale de la canasta, reseteamos el estado
-            Invoke(nameof(Reset), 1f);
+            Invoke(nameof(Reset), 1.5f);
         }
     }
 
