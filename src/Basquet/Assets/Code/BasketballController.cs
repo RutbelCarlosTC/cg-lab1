@@ -6,11 +6,11 @@ public class BasketballController : MonoBehaviour
     public float MoveSpeed = 10f;
 
     [Header("Lanzamiento")]
-    public float baseLaunchDistance = 1f;
+    public float baseLaunchDistance = 3f;
     public float maxLaunchDistance = 10f;
     public float chargeSpeed = 5f;
     public float gravity = -9.8f;
-    [SerializeField] private float maxHeight = 10f;
+    [SerializeField] private float maxHeight = 5f;
 
     private float currentLaunchDistance;
     private float launchDistance;
