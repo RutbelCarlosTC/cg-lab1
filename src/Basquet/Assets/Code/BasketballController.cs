@@ -58,7 +58,12 @@ public class BasketballController : MonoBehaviour
 
                 // Dibujar trayectoria
                 Vector3 launchDirection = transform.forward;
-                DrawTrajectory(PosOverHead.position, launchDirection, currentLaunchDistance, maxHeight);
+
+                Vector3 start = PosOverHead.position;
+                Vector3 target = start + launchDirection * currentLaunchDistance;
+                Vector3 initialVelocity = CalcularVelocidadInicial(start, target);
+
+                DrawTrajectory(start, initialVelocity);
                 TrajectoryLine.enabled = true;
 
                 //Debug.Log("Posicion manos arriba: " + Ball.position);
@@ -117,18 +122,27 @@ public class BasketballController : MonoBehaviour
         return new Vector3(velocidadX, velocidadY, velocidadZ);
     }
 
-    void DrawTrajectory(Vector3 start, Vector3 direction, float distance, float height)
+    void DrawTrajectory(Vector3 start, Vector3 initialVelocity)
     {
         TrajectoryLine.positionCount = trajectoryResolution;
 
+        float g = Mathf.Abs(gravity);
+        float totalTime = 2 * initialVelocity.y / g;
+
         for (int i = 0; i < trajectoryResolution; i++)
         {
-            float t = i / (float)(trajectoryResolution - 1);
-            Vector3 linearPos = Vector3.Lerp(start, start + direction * distance, t);
-            Vector3 arc = height * Mathf.Sin(t * Mathf.PI) * Vector3.up;
-            TrajectoryLine.SetPosition(i, linearPos + arc);
+            float t = i / (float)(trajectoryResolution - 1) * totalTime;
+
+            Vector3 position = start + new Vector3(
+                initialVelocity.x * t,
+                initialVelocity.y * t - 0.5f * g * t * t,
+                initialVelocity.z * t
+            );
+
+            TrajectoryLine.SetPosition(i, position);
         }
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
