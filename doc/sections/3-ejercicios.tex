@@ -1,16 +1,269 @@
 \section{SOLUCIÓN DE EJERCICIOS/PROBLEMAS}
 
-Utilicen las habilidades que ha aprendido en los cursos anteriores para crear una aplicación enfocada en el lanzamiento de proyectiles utilizando el motor de física. Se puede crear un juego baloncesto donde se busque lanzar una pelota en un aro de baloncesto o un juego donde lancen proyectiles a enemigos y los enemigos puedan atacar al usuario con proyectiles. 
+Utilicen las habilidades que han aprendido en los cursos anteriores para crear una aplicación enfocada en el lanzamiento de proyectiles utilizando el motor de física. Se puede crear un juego de baloncesto donde se busque lanzar una pelota en un aro de baloncesto o un juego donde lancen proyectiles a enemigos y los enemigos puedan atacar al usuario con proyectiles.
 
-Tendrán que utilizar el motor de física para realizar el lanzamiento, donde se pueda cambiar los valores de física y afecte el desplazamiento del objeto.
+\begin{itemize}
+    \item Tendrán que utilizar el motor de física para realizar el lanzamiento, donde se puedan modificar los valores físicos y estos afecten el desplazamiento del objeto.
+    \item La aplicación debe permitir gestionar valores como la puntuación, basada en las canastas obtenidas, o la vida de los enemigos o del jugador.
+    \item Deberán establecer cómo funcionarán las colisiones del proyectil.
+    \item La aplicación debe permitir gestionar valores como la puntuación.
+    \item Se busca que investiguen qué otros elementos pueden agregar a la aplicación para mejorar la experiencia del usuario, como efectos visuales y sonoros o la implementación de diferentes tipos de proyectiles.
+\end{itemize}
 
 \subsection{Entorno y personajes}
 
-\subsection{Motor de física}
-anioAcademicoLaboratorioaaaaaa
+\subsubsection{Escenario}
+El escenario es una cancha de baloncesto con un jugador en medio. Algunos de sus elementos son:
+
+\begin{itemize}
+    \item \textbf{Cancha (Floor):} Superficie que representa la zona de juego donde se mueve el jugador y se lanza la pelota.
+    \item \textbf{Aro de Baloncesto (Hoop):} Incluye el tablero y un aro de baloncesto en el centro del escenario.
+    \item \textbf{Fondo (Background):} Imagen de un estadio lleno de espectadores.
+    \item \textbf{Elementos Adicionales:} Objetos como Canvas, Límites relacionados con la interfaz de usuario y lógica de colisiones.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/epis.png}
+    \caption{Escenario del juego}
+    \label{fig:escenario}
+\end{figure}
+
+\subsubsection{Jugador}
+El objeto Player representa al personaje controlable. Cuenta con:
+\begin{itemize}
+    \item Capsule Collider para colisiones
+    \item Script Basketball Controller para gestionar movimiento y acciones
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/epis.png}
+    \caption{Personaje controlable}
+    \label{fig:jugador}
+\end{figure}
+
+\subsubsection{Balón}
+El objeto Ball representa una pelota de baloncesto con:
+\begin{itemize}
+    \item Box Collider y Rigidbody
+    \item Material físico (BouncyBall) para comportamiento realista
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/epis.png}
+    \caption{Objeto Ball}
+    \label{fig:balon}
+\end{figure}
+
+\subsection{Interacción del usuario}
+
+\subsubsection{Movimiento del jugador}
+El jugador se desplaza en el plano horizontal usando teclas WASD o flechas:
+
+\begin{lstlisting}[language=C++]
+// Movimiento del jugador
+Vector3 direction = new(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+transform.position += MoveSpeed * Time.deltaTime * direction;
+if (direction != Vector3.zero)
+    transform.LookAt(transform.position + direction);
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/epis.png}
+    \caption{Movimiento del personaje}
+    \label{fig:movimiento}
+\end{figure}
+
+\subsubsection{Control del balón}
+Cuando el jugador tiene el balón (IsBallInHands == true):
+\begin{lstlisting}[language=C++]
+if (IsBallInHands) {
+    if (Input.GetKey(KeyCode.Space)){}
+    else {
+        // Animación de dribbling
+        Ball.position = PosDribble.position + Vector3.up * Mathf.Abs(Mathf.Sin(Time.time * 7));
+        Arms.localEulerAngles = Vector3.right * 0;
+    }
+}
+\end{lstlisting}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/epis.png}
+    \caption{Movimiento del balón}
+    \label{fig:dribbling}
+\end{figure}
+
+\subsubsection{Cargar lanzamiento}
+Al mantener presionado espacio:
+\begin{itemize}
+    \item El balón se mueve a la posición sobre la cabeza
+    \item Se incrementa la fuerza del lanzamiento
+    \item Se dibuja trayectoria parabólica con LineRenderer
+\end{itemize}
+
+\begin{lstlisting}[language=C++]
+if (Input.GetKey(KeyCode.Space)) {
+    currentLaunchDistance += chargeSpeed * Time.deltaTime;
+    currentLaunchDistance = Mathf.Clamp(currentLaunchDistance, baseLaunchDistance, maxLaunchDistance);
+    Ball.position = PosOverHead.position;
+    Arms.localEulerAngles = Vector3.right * 180;
+    DrawTrajectory(PosOverHead.position, launchDirection, currentLaunchDistance, maxHeight);
+    TrajectoryLine.enabled = true;
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/epis.png}
+    \caption{Carga del lanzamiento del balón}
+    \label{fig:cargar}
+\end{figure}
+
+\subsubsection{Lanzamiento del balón}
+Al soltar espacio:
+\begin{lstlisting}[language=C++]
+if (Input.GetKeyUp(KeyCode.Space)) {
+    launchDistance = currentLaunchDistance;
+    currentLaunchDistance = baseLaunchDistance;
+    Lanzar();
+    IsBallInHands = false;
+    TrajectoryLine.enabled = false;
+}
+
+void Lanzar() {
+    Vector3 launchDirection = transform.forward;
+    Vector3 A = PosOverHead.position;
+    Ball.position = A;
+    Vector3 B = A + launchDirection * launchDistance;
+    Rigidbody ballRB = Ball.GetComponent<Rigidbody>();
+    ballRB.useGravity = true;
+    ballRB.velocity = CalcularVelocidadInicial(A, B);
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/epis.png}
+    \caption{Lanzamiento del balón}
+    \label{fig:lanzamiento}
+\end{figure}
+
+\subsubsection{Cálculo de velocidad inicial}
+Fórmulas para trayectoria parabólica:
+\begin{lstlisting}[language=C++]
+Vector3 CalcularVelocidadInicial(Vector3 origen, Vector3 destino) {
+    Vector3 desplazamiento = destino - origen;
+    float g = Mathf.Abs(gravity);
+    float velocidadY = Mathf.Sqrt(2 * g * maxHeight);
+    float t1 = velocidadY / g;
+    float h = desplazamiento.y + maxHeight;
+    if (h < 0) h = 0;
+    float t2 = Mathf.Sqrt(2 * h / g);
+    float tTotal = t1 + t2;
+    float velocidadX = desplazamiento.x / tTotal;
+    float velocidadZ = desplazamiento.z / tTotal;
+    return new Vector3(velocidadX, velocidadY, velocidadZ);
+}
+\end{lstlisting}
 
 \subsection{Colisiones}
+Configuración de colisiones:
+\begin{itemize}
+    \item \textbf{Jugador:} "Is Trigger" activado para detectar colisiones sin bloqueo físico
+    \item \textbf{Balón:} "Collision Detection" en modo Continuous para evitar traspasos
+\end{itemize}
 
-\subsection{Lógica de juego}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/epis.png}
+    \caption{Propiedad "Is Trigger" del jugador}
+    \label{fig:trigger}
+\end{figure}
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/epis.png}
+    \caption{Propiedad "Collision Detection" del balón}
+    \label{fig:collision}
+\end{figure}
 
+Manejo de colisiones:
+\begin{lstlisting}[language=C++]
+private void OnTriggerEnter(Collider other) {
+    if (!IsBallInHands) {
+        IsBallInHands = true;
+    }
+}
+\end{lstlisting}
+
+\subsection{Puntuación}
+Sistema de puntuación:
+\begin{itemize}
+    \item Dos colliders Trigger en el aro (superior e inferior)
+    \item Collider inferior marca entradas inválidas
+    \item Collider superior suma puntos si no es inválida
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{img/epis.png}
+    \caption{Collider superior e inferior de aro}
+    \label{fig:aro}
+\end{figure}
+
+Lógica de puntuación:
+\begin{lstlisting}[language=C++]
+public bool CanScore() {
+    return !enteredFromBelow && !scored;
+}
+public void RegisterScore() {
+    scored = true;
+    ScoreManager.Instance.AddPoint();
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/epis.png}
+    \caption{Ejemplo de puntaje válido}
+    \label{fig:valido}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/epis.png}
+    \caption{Ejemplo de puntaje inválido}
+    \label{fig:invalido}
+\end{figure}
+
+\subsection{Efectos visuales}
+Dibujo de trayectoria:
+\begin{lstlisting}[language=C++]
+void DrawTrajectory(Vector3 start, Vector3 initialVelocity) {
+    TrajectoryLine.positionCount = trajectoryResolution;
+    float g = Mathf.Abs(gravity);
+    float totalTime = 2 * initialVelocity.y / g;
+    
+    for (int i = 0; i < trajectoryResolution; i++) {
+        float t = i / (float)(trajectoryResolution - 1) * totalTime;
+        Vector3 position = start + new Vector3(
+            initialVelocity.x * t,
+            initialVelocity.y * t - 0.5f * g * t * t,
+            initialVelocity.z * t
+        );
+        TrajectoryLine.SetPosition(i, position);
+    }
+}
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/epis.png}
+    \caption{Ejemplo de trayectorias dibujadas}
+    \label{fig:trayectoria}
+\end{figure}

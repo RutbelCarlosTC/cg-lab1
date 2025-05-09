@@ -1,7 +1,6 @@
 {
     "version": "0.2",
     "language": "en,es",
-
     "ignorePaths": [
         "**/.gitignore",
         "**/.git/**",
@@ -16,7 +15,15 @@
         "**/*.synctex.gz",
         "build/_minted/**",
         "img/**",
-        "refs.bib"
+        "refs.bib",
+        "doc/config/*",
+        "doc/sections/z-template.tex",
+        "/usr/local/texlive/2025/texmf-dist/tex/latex/base/inputenc.sty"
     ],
-    "words": ["Colab"]
+    "words": [
+        "Colab",
+        "Mathf",
+        "Rigidbody",
+        "WASD"
+    ]
 }

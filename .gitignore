@@ -1,4 +1,5 @@
 # Archivos y directorios generados por LaTeX
+*.bbl-SAVE-ERROR
 *.aux
 *.bbl
 *.bcf

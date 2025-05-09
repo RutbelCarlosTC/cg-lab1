@@ -8,10 +8,10 @@ def campo_electrico(q, r0, x, y):
     return q * (x - r0[0]) / den, q * (y - r0[1]) / den
 
 def plot_lineas_de_campo(q1, q2):
-  r1 = np.array([-1, 0])  # Posición de la carga 1
-  r2 = np.array([1, 0])  # Posición de la carga 2
+  r1 = np.array([-1, 0])  
+  r2 = np.array([1, 0])  
 
-  # Crear la malla de puntos donde se calculará el campo eléctrico
+  #Crear la malla de puntos donde se calculará el campo eléctrico
   nx, ny = 64, 64
   x = np.linspace(-2, 2, nx)
   y = np.linspace(-2, 2, ny)
